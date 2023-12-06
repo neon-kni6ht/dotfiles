@@ -1,0 +1,411 @@
+(defwidget bar []
+(box :class "bar"
+ (power)
+ (box 
+    (sidestuff))
+ )
+)
+
+(defwidget bar1 []
+(box :class "bar"
+ (box :space-evenly false
+    (memory_scale)
+    (brightness_scale)
+    (volume_scale)
+ )
+ (box :class "sidestuff" :orientation "h" :space-evenly false :halign "end"
+  (language)
+  )
+ )
+)
+(defwidget sidestuff []
+  (box :class "sidestuff" :orientation "h" :space-evenly false :halign "end"
+   (net)
+   (battery_reveal)
+   (clock_scale)
+   )
+)
+
+(defwidget volume_scale[]
+ (box :class "button_scale" :orientation "h" :space-evenly false :halign "start"
+    (revealer-on-hover :class "hl-on-hover"
+      :var revealVolume
+      :varname "revealVolume"
+      :transition "slideRight"
+      :class "volume"    
+    (hovered-sign :var revealVolume
+        (label :text "")
+        (label :text ""))
+    (metric 
+        :label ""
+        :value volumeInt 
+        :onchange "scripts/volumecontrol set {}")
+    (button
+        :class "icon_volume"
+        :onclick "scripts/volumecontrol mute"
+        volumeIcon)
+	)
+   )
+)
+
+
+(defwidget memory_scale[]
+ (box :class "button_scale" :orientation "h" :space-evenly false :halign "start"
+    (revealer-on-hover :class "hl-on-hover"
+      :var revealMemory
+      :varname "revealMemory"
+      :transition "slideRight"
+      :class "memory"    
+    (hovered-sign :var revealMemory
+        (label :text "")
+        (label :text ""))
+    (box :class "" 
+	 :orientation "h" 
+	 :space-evenly false 
+	 :halign "center"
+    (metric 
+        :label ""
+        :value {EWW_RAM.used_mem_perc} 
+        :onchange "")
+    (box :class "icon" 
+	 :orientation "h" 
+	 :space-evenly false 
+	 :halign "center" "󰆼")
+    (metric 
+        :label ""
+        :value cpu
+        :onchange ""
+	)	
+	)
+    (box :class "icon" 
+	 :orientation "h" 
+	 :space-evenly false 
+	 :halign "center" "")
+	)
+   )
+)
+
+(defwidget brightness_scale[]
+ (box :class "button_scale" :orientation "h" :space-evenly false :halign "start"
+    (revealer-on-hover :class "hl-on-hover"
+      :var revealBrigtness
+      :varname "revealBrigtness"
+      :transition "slideRight"
+      :class "brigtness"    
+    (hovered-sign :var revealBrigtness
+        (label :text "")
+        (label :text ""))    
+    (metric 
+        :label ""
+	:value brightnessInt
+	:onchange "scripts/brightnesscontrol set {}")
+    (button
+        :class "icon"
+	:onclick "scripts/brightnesscontrol down"
+	:onrightclick "scripts/brightnesscontrol up"
+        ""))
+   )
+)
+
+
+(defwidget clock_scale[]
+ (box :class "button_scale" :orientation "h" :space-evenly false :halign "start"
+    (revealer-on-hover :class "hl-on-hover"
+      :var revealCalendar
+      :varname "revealCalendar"
+      :transition "slideleft"
+      :class "clock"    
+    (hovered-sign :var revealCalendar
+        (label :text "")
+        (label :text ""))    
+    (button
+        :class "calendar"
+	:onclick "scripts/calendar.sh show"
+        date)
+    (box
+        :class "calendar"
+	time))
+   )
+)
+
+
+(defwidget battery_reveal[]
+ (box :class "button_scale" :orientation "h" :space-evenly false :halign "end"
+    (revealer-on-hover :class "hl-on-hover"
+      :var revealBattery
+      :varname "revealBattery"
+      :transition "slideleft"
+      :class "clock"    
+    (hovered-sign :var revealBattery
+        (label :text "")
+        (label :text ""))    
+    (battery
+        :class "label"
+	:onclick "scripts/battery.py --status"
+        batteryInt)
+    (box
+	:space-evenly false
+	:orientation "h"
+	:halign "start"
+        :class "battery"
+	batteryIcon))
+   )
+)
+
+(defwidget metric [label value onchange]
+  (box :orientation "h"
+       :class "metric"
+       :space-evenly false
+    (box :class "label" label)
+    (scale :min 0
+           :max 101
+           :active {onchange != ""}
+           :value value
+           :onchange onchange)))
+
+(defwidget hovered-sign [var]
+  (box :space-evenly false
+      (revealer :reveal {!var}
+                :duration "100ms"
+                :transition "slideleft"
+        (children :nth 0)) 
+      (revealer :reveal {var}
+                :duration "100ms"
+                :transition "slideleft"
+        (children :nth 1)))) 
+
+; Revealer on hover, using children
+(defwidget revealer-on-hover [var varname ?class ?duration ?transition]
+  (box :class "${class} revealer-on-hover"
+       :orientation "h"
+       :space-evenly false
+    (eventbox :class "eventbox"
+              :onhover "eww update ${varname}=true"
+              :onhoverlost "eww update ${varname}=false"
+      (box :space-evenly false
+        (children :nth 0)
+        (revealer :reveal var
+                  :transition {transition ?: "slideright"}
+                  :duration {duration ?: "500ms"}
+          (children :nth 1))
+        (box :class "${class}" (children :nth 2))))))
+
+
+(defwidget clickbox [var varname ?class ?duration ?transition]
+  (box :class "${class} clickbox" :orientation "h" :space-evenly false
+    (button :onclick "eww update ${varname}=${ var ? false : true }"
+      (children :nth 0)
+    )
+      (revealer :reveal var
+      :transition {transition ?: "slideleft"}
+      :duration {duration ?: "500ms"}
+      (box :class "${class}"
+      :space-evenly false
+      (children :nth 1)
+      (button :onclick "eww update ${varname}=false" :class "close" (label :text "Close"))
+      )
+    )
+  )
+)
+
+(deflisten workspace0
+  "scripts/workspace.sh 0")
+
+(defwidget workspaces0 []
+  (literal :content workspace0))
+
+(deflisten workspace1
+  "scripts/workspace.sh 1")
+
+(defwidget workspaces1 []
+  (literal :content workspace1))
+
+(defwidget language []
+  (box :class "language"
+       :orientation "h"
+       :space-evenly false
+       :halign "end"
+       :spacing 10
+    (box
+	:space-evenly false
+        :class "icon"
+	language)
+))
+
+(defwidget updates []
+  (box 
+       :class "${matches(arch-updates, '^\s*$')?'paru-empty':'paru'}"
+       :orientation "h"
+       :space-evenly false
+       :halign "end"
+       :spacing 10
+    (button
+        :class ""
+	:onclick "foot bash -c 'paru; ~/.config/eww/scripts/arch-updates.sh Refresh'&"
+        arch-updates)
+))
+
+(defwidget scratchpad-indicator []
+  (box 
+       :class "${matches(scratchpad, '^\s*$')?'scratchpad-empty':'scratchpad'}"
+       :orientation "h"
+       :space-evenly false
+       :halign "end"
+       :spacing 10
+    (button
+        :class ""
+	:onclick "scripts/scratchpad-indicator.sh ShowInfo"
+        scratchpad)
+))
+
+(defwidget idleinhibit []
+  (box :class "idle"
+       :orientation "h"
+       :space-evenly false
+       :halign "end"
+       :spacing 10
+    (button
+        :class ""
+	:onclick "scripts/idleinhibit.sh toggle"
+        idle)
+))
+
+(defwidget net []
+  (box :class "net"
+       :orientation "h"
+       :space-evenly false
+       :halign "end"
+       :spacing 10
+    (button
+        :class "iconStatic"
+	:onclick "scripts/network.sh ShowInfo"
+        network)
+))
+
+(defwidget battery []
+  (box :class "battery"
+       :orientation "h"
+       :space-evenly false
+       :halign "end"
+       :spacing 10
+    (button
+        :class "iconStatic"
+	:onclick "scripts/battery.py --c left-click"
+        :onmiddleclick "scripts/battery.py --c middle-click"
+	:onrightclick "scripts/battery.py --c right-click"
+        batteryInt)
+))
+
+(defwidget power []
+	(eventbox	:onhover "eww update power=true"	
+				:onhoverlost "eww update power=false" 
+	(box		:orientation "h"					
+				:space-evenly "false" 	 
+				:vexpand "false" 	
+				:class "powermenu"
+	(revealer	:transition "slideleft"				
+				:reveal power			 
+				:duration "550ms"
+	(box		:orientation "h"					
+				:space-evenly "false"
+
+	(button   	:class "icon"  			
+				;:tooltip "Hyprland reload" 
+				:onclick "hyprctl reload" "󰓡" )
+
+  	(button		:class "icon"					
+	  			;:tooltip "Reboot"		 
+				:onclick "reboot" "")
+
+	(button		:class "icon" 				
+				;:tooltip "Logout" 		 
+				:onclick "hyprctl dispatch exit" "󰍃")
+
+	(button		:class "icon" 				
+				;:tooltip "Lock Screen"	 
+				:onclick "betterlockscreen -l"	"󰍁")))
+
+	(button		:class "icon"					
+				;:tooltip "Shutdown"		 
+				:onclick "shutdown now"	"󰛡"))))
+(defvar power false)
+
+(defpoll batteryIcon :interval "30s"
+  "scripts/battery.py --c status | grep -Po -m 1 ^.")
+
+(defpoll batteryInt :interval "2s"
+		    :run-while revealBattery
+  "scripts/battery.py --c status | grep -E -o '[0-9]*%$'")
+
+(defpoll scratchpad :interval "1s"
+  "scripts/scratchpad-indicator.sh Update || echo null")
+
+(defpoll language :interval "1s"
+  "scripts/keyboardlayout.sh")
+
+(defpoll network :interval "1s"
+  "scripts/network.sh")
+
+(defpoll idle :interval "1s"
+  "scripts/idleinhibit.sh")
+
+(defpoll arch-updates :interval "600s"
+  "scripts/arch-updates.sh")
+
+(defpoll volumeIcon :interval "500ms"
+  "scripts/volumecontrol | grep -Po -m 1 ^.")
+
+(defpoll volumeInt :interval "700ms"
+		   :run-while revealVolume
+  "scripts/volumecontrol | grep -Po [0-9]*")
+
+(defpoll brightnessInt :interval "1s"
+		       :run-while revealBrightness
+  "scripts/brightnesscontrol | grep -Po [0-9]*")
+
+(defpoll time :interval "1s"
+  "scripts/date-time.sh | grep -Po [0-9]{2}:[0-9]{2}")
+
+(defpoll date :interval "1m"
+	      :run-while revealCalendar
+  "scripts/date-time.sh | grep -E -o -a -m 1 '^[a-zA-Z0-9 ]*'")
+
+(defpoll cpu :interval "2s"
+	     :run-while revealMemory
+ "scripts/cpu.sh")
+
+(defvar revealVolume false)
+
+(defvar revealBrigtness false)
+
+(defvar revealMemory false)
+
+(defvar revealCalendar false)
+
+(defvar revealBattery false)
+
+(defwindow bar
+  :monitor 0
+  :windowtype "dock"
+  :geometry (geometry :x "0%"
+                      :y "0px"
+                      :width "100%"
+                      :height "20px"
+                      :anchor "top center")
+  :stacking "bt"
+  :exclusive true
+  :focusable false
+  (bar))
+
+(defwindow bar1
+  :monitor 0
+  :windowtype "dock"
+  :geometry (geometry :x "0%"
+                      :y "0px"
+                      :width "100%"
+                      :height "20px"
+                      :anchor "bottom center")
+  :stacking "bt"
+  :exclusive true
+  :focusable false
+  (bar1))
