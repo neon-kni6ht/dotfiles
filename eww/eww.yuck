@@ -1,8 +1,9 @@
 (defwidget bar []
 (box :class "bar"
- (power)
- (box 
-    (sidestuff))
+(power)
+ (box
+    (sidestuff)
+   )
  )
 )
 
@@ -73,7 +74,7 @@
 	 :halign "center" "󰆼")
     (metric 
         :label ""
-        :value cpu
+        :value {EWW_CPU.avg}
         :onchange ""
 	)	
 	)
@@ -384,6 +385,23 @@
 
 (defvar revealBattery false)
 
+(deflisten waybar "scripts/waybar.sh | grep"
+)
+
+(defwindow status_bar
+:monitor 0
+:stacking "fg"
+:exclusive false
+:geometry (geometry :anchor "top center" :y "-23" :"height "30px" :width "100%")
+(tray))
+
+(defwidget tray[]
+(box
+ (box :space-evenly false :orientation "h" :halign "start" :width "30%" (power))
+ (box :space-evenly false :orientation "h" :halign "center" :width "30%" waybar)
+ (box :space-evenly false :orientation "h" :halign "end" :width "30%" (sidestuff))
+)
+)
 (defwindow bar
   :monitor 0
   :windowtype "dock"
